@@ -127,6 +127,7 @@ class ReceiverRestrictedContext extends ContextWrapper {
 }
 
 /**
+ *Context的具体实现类
  * Common implementation of Context API, which provides the base
  * context object for Activity and other application components.
  */
@@ -1414,7 +1415,6 @@ class ContextImpl extends Context {
             throw e.rethrowFromSystemServer();
         }
     }
-
     @Override
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {

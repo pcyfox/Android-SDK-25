@@ -147,7 +147,8 @@ final class SystemServiceRegistry {
 
     // Not instantiable.
     private SystemServiceRegistry() { }
-
+	
+   //-------------------------在这里能找打所有系统服务的具体实现类----------------------------
     static {
         registerService(Context.ACCESSIBILITY_SERVICE, AccessibilityManager.class,
                 new CachedServiceFetcher<AccessibilityManager>() {

@@ -849,8 +849,7 @@ public final class ActivityThread {
             sendMessage(H.STOP_SERVICE, token);
         }
 		
-
-
+		
         //当在attach方法中将ApplicationThread与AMS关联后会被调用
         public final void bindApplication(String processName, ApplicationInfo appInfo,
                 List<ProviderInfo> providers, ComponentName instrumentationName,
