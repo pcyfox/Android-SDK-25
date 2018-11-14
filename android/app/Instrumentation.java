@@ -1513,7 +1513,9 @@ public class Instrumentation {
             }
         }
         try {
+			//将intent中的数据迁移到粘贴板
             intent.migrateExtraStreamToClipData();
+			//准备离开当前进程
             intent.prepareToLeaveProcess(who);
 			//ActivityManagerService是ActivityManagerNative的子类
 			//通过system's default/global activity manager即（AMS）启动Activity

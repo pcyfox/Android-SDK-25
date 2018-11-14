@@ -183,6 +183,7 @@ public final class WindowManagerGlobal {
                 try {
                     InputMethodManager imm = InputMethodManager.getInstance();
                     IWindowManager windowManager = getWindowManagerService();
+					//与WindowManagerService间建立Session连接
                     sWindowSession = windowManager.openSession(
                             new IWindowSessionCallback.Stub() {
                                 @Override
@@ -327,11 +328,10 @@ public final class WindowManagerGlobal {
                     }
                 }
             }
-
+            //构建ViewRootImpl实例，ViewRootImpl是FrameWork层与Native层的通讯桥梁
             root = new ViewRootImpl(view.getContext(), display);
-
             view.setLayoutParams(wparams);
-
+            //缓存实例
             mViews.add(view);
             mRoots.add(root);
             mParams.add(wparams);

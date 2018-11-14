@@ -55,7 +55,7 @@ public class PhoneLayoutInflater extends LayoutInflater {
     @Override protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
         for (String prefix : sClassPrefixList) {
             try {
-				//同过类加载器、反射机制获得View实例
+				//通过类加载器、反射机制获得View实例
                 View view = createView(name, prefix, attrs);
                 if (view != null) {
                     return view;

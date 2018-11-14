@@ -2126,9 +2126,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(this);
-
+            //获取data目录
             File dataDir = Environment.getDataDirectory();
+			//获取/data/app目录
             mAppInstallDir = new File(dataDir, "app");
+			
             mAppLib32InstallDir = new File(dataDir, "app-lib");
             mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
@@ -2276,7 +2278,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-
+            //扫描供应商提供的配置包
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
             // For security and version matching reason, only consider
@@ -2286,7 +2288,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
-
+            //扫描frameworks资源
             // Find base frameworks (resource packages without code).
             scanDirTracedLI(frameworkDir, mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM
@@ -6630,7 +6632,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
-
+  
     private void scanDirTracedLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir");
         try {
@@ -6639,7 +6641,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
-
+   //扫描apk
     private void scanDirLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
         final File[] files = dir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -6775,6 +6777,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
+	 *扫描安装包
      *  Scans a package and returns the newly parsed package.
      *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */

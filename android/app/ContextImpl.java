@@ -185,7 +185,8 @@ class ContextImpl extends Context {
     private File mCacheDir;
     @GuardedBy("mSync")
     private File mCodeCacheDir;
-
+	
+    //当VM加载SystemServiceRegistry类时会执行其静态域中方法完成所有系统服务注册并添加到一个hashMap中缓存
     // The system service cache for the system services that are cached per-ContextImpl.
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
 

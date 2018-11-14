@@ -757,6 +757,7 @@ class ActivityStarter {
                 }
             }
         }
+		
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 

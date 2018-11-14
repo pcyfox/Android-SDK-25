@@ -411,9 +411,11 @@ public final class ViewRootImpl implements ViewParent,
 
     public ViewRootImpl(Context context, Display display) {
         mContext = context;
+		//与WMS建立联系
         mWindowSession = WindowManagerGlobal.getWindowSession();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
+		//获取创建ViewRootImpl实例的线程，即主线程，只允许在该线程更新UI
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();
@@ -627,7 +629,9 @@ public final class ViewRootImpl implements ViewParent,
                 // Schedule the first layout -before- adding to the window
                 // manager, to make sure we do the relayout before receiving
                 // any other events from the system.
+				//1、检查是否在UI线程调用，2、触发视图绘制工作
                 requestLayout();
+				
                 if ((mWindowAttributes.inputFeatures
                         & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
                     mInputChannel = new InputChannel();
@@ -638,7 +642,7 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
-
+                    //WMS仅负责管理屏幕上View的z-oder，决定哪个View显示在最上层
 					//跨进程添加视图，具体实现：package com.android.server.wm.Session
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(),
@@ -2611,7 +2615,7 @@ public final class ViewRootImpl implements ViewParent,
 
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
-        try {
+        try {//调用绘制函数
             draw(fullRedrawNeeded);
         } finally {
             mIsDrawing = false;
@@ -2803,7 +2807,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (updated) {
                     requestDrawWindow();
                 }
-
+                //使用硬件渲染器绘制（GPU）
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
@@ -2830,7 +2834,7 @@ public final class ViewRootImpl implements ViewParent,
                     scheduleTraversals();
                     return;
                 }
-
+                //使用CPU绘制（默认使用该方式绘制）
                 if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
                     return;
                 }
@@ -2856,7 +2860,7 @@ public final class ViewRootImpl implements ViewParent,
             final int top = dirty.top;
             final int right = dirty.right;
             final int bottom = dirty.bottom;
-
+            //锁定的canvas区域，用于FrameWork层绘制
             canvas = mSurface.lockCanvas(dirty);
 
             // The dirty rectangle can be modified by Surface.lockCanvas()
@@ -2916,7 +2920,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 canvas.setScreenDensity(scalingRequired ? mNoncompatDensity : 0);
                 attachInfo.mSetIgnoreDirtyState = false;
-
+                //绘制通过setView添加的view
                 mView.draw(canvas);
 
                 drawAccessibilityFocusedDrawableIfNeeded(canvas);
@@ -2928,6 +2932,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         } finally {
             try {
+				//释放canvas
                 surface.unlockCanvasAndPost(canvas);
             } catch (IllegalArgumentException e) {
                 Log.e(mTag, "Could not unlock surface", e);

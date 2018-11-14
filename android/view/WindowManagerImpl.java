@@ -54,7 +54,8 @@ import java.util.List;
  * @hide
  */
 public final class WindowManagerImpl implements WindowManager {
-	//全局单例实例，所有view，不管是来自哪个Activity或其它组件都将被添加至此
+
+	//全局单例实例，通过ViewRootImpl的setView方法跨进程调用WMS方法进一步将view显示出来
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     private final Context mContext;
     private final Window mParentWindow;

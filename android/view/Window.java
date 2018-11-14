@@ -740,6 +740,7 @@ public abstract class Window {
         if (wm == null) {
             wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         }
+		//将window与windowManager联系起来
         mWindowManager = ((WindowManagerImpl)wm).createLocalWindowManager(this);
     }
 
