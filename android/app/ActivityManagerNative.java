@@ -75,7 +75,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         if (in != null) {
             return in;
         }
-
+        //IActivityManager代理
         return new ActivityManagerProxy(obj);
     }
 
@@ -162,6 +162,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                     ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
+            //调用子类ActivityManagerService中的startActivity方法
             int result = startActivity(app, callingPackage, intent, resolvedType,
                     resultTo, resultWho, requestCode, startFlags, profilerInfo, options);
             reply.writeNoException();
@@ -3046,11 +3047,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
     private static final Singleton<IActivityManager> gDefault = new Singleton<IActivityManager>() {
         protected IActivityManager create() {
-			//获取系统的AMS
+			//绑定系统服务的AMS返回的Binder
             IBinder b = ServiceManager.getService("activity");
             if (false) {
                 Log.v("ActivityManager", "default service binder = " + b);
             }
+			//获取代理
             IActivityManager am = asInterface(b);
             if (false) {
                 Log.v("ActivityManager", "default service = " + am);
@@ -3071,7 +3073,10 @@ class ActivityManagerProxy implements IActivityManager
     {
         return mRemote;
     }
-
+	
+  /**
+   *@param caller为ApplicationThread类型的Binder实体,系统进程中的AMS通过它与app所在进程通讯，如启动Activity、Service等。
+   */
     public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException {
@@ -3098,6 +3103,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+		//远程调用AMS中的方法
         mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();

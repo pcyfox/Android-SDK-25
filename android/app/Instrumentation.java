@@ -1464,15 +1464,21 @@ public class Instrumentation {
      * <p>This method throws {@link android.content.ActivityNotFoundException}
      * if there was no Activity found to run the given Intent.
      *
-     * @param who The Context from which the activity is being started.
+     * @param who The Context from which the activity is being started.启动者
      * @param contextThread The main thread of the Context from which the activity
      *                      is being started.
+	 *ApplicationThread类型的Binder实体
+	 *
      * @param token Internal token identifying to the system who is starting 
      *              the activity; may be null.
      * @param target Which activity is performing the start (and thus receiving 
      *               any result); may be null if this call is not being made
      *               from an activity.
+	 *执行启动及需要接收result的哪个Activity
+	 *
      * @param intent The actual Intent to start.
+	 *真正需要启动的目标
+	 *
      * @param requestCode Identifier for this request's result; less than zero 
      *                    if the caller is not expecting a result.
      * @param options Addition options.
@@ -1639,6 +1645,8 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
+			//ActivityManagerNative$ActivityManagerNative.getDefault()获得的是ActivityManagerProxy实例，是一个Binder对象
+	
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),

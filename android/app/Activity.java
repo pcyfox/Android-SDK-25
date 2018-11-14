@@ -4221,12 +4221,14 @@ public class Activity extends ContextThemeWrapper
             @Nullable Bundle options) {
         if (mParent == null) {
             options = transferSpringboardActivityOptions(options);
+			//mMainThread即ActivityThread实例，在performLaunchActivity方法中 activity的attach方时赋值
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
                     intent, requestCode, options);
+			
             if (ar != null) {
-				//mMainThread即ActivityThread实例
+				
                 mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(),
                     ar.getResultData());
@@ -4873,6 +4875,7 @@ public class Activity extends ContextThemeWrapper
             intent.putExtra(Intent.EXTRA_REFERRER, referrer);
         }
         options = transferSpringboardActivityOptions(options);
+		//Activity起点
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, who,

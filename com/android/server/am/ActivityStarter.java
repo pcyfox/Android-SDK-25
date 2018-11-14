@@ -239,7 +239,9 @@ class ActivityStarter {
 
         ProcessRecord callerApp = null;
         if (caller != null) {
+			//根据caller获取调用者的进程信息
             callerApp = mService.getRecordForAppLocked(caller);
+			//记录pid与uid
             if (callerApp != null) {
                 callingPid = callerApp.pid;
                 callingUid = callerApp.info.uid;
@@ -469,7 +471,8 @@ class ActivityStarter {
 
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
-
+		
+         //创建ActivityRecord实例用于即将要启动的Activity的相关信息
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
                 requestCode, componentSpecified, voiceSession != null, mSupervisor, container,
@@ -731,7 +734,7 @@ class ActivityStarter {
         final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
         intent = new Intent(intent);
-
+        //解析intent
         ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
         if (rInfo == null) {
             UserInfo userInfo = mSupervisor.getUserInfo(userId);
@@ -759,6 +762,7 @@ class ActivityStarter {
         }
 		
         // Collect information about the target of the Intent.
+		//从intent中获取需要启动的Activity的信息
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
         ActivityOptions options = ActivityOptions.fromBundle(bOptions);
@@ -858,6 +862,7 @@ class ActivityStarter {
             }
 
             final ActivityRecord[] outRecord = new ActivityRecord[1];
+			
 			//--------------startActivityLocked------------>
             int res = startActivityLocked(caller, intent, ephemeralIntent, resolvedType,
                     aInfo, rInfo, voiceSession, voiceInteractor,
@@ -1115,7 +1120,7 @@ class ActivityStarter {
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
         }
-
+        //根据当前栈顶的ActivityRecord检测当是否需要再次启动Activity
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mSupervisor.mFocusedStack;
@@ -1153,7 +1158,7 @@ class ActivityStarter {
         boolean newTask = false;
         final TaskRecord taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                 ? mSourceRecord.task : null;
-
+        //检测是否创建一个新栈
         // Should this be considered a new task?
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
@@ -1205,16 +1210,19 @@ class ActivityStarter {
         if (mSourceRecord != null && mSourceRecord.isRecentsActivity()) {
             mStartActivity.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
         }
+		//创建新栈并保存taskId到mStartActivity.task
         if (newTask) {
             EventLog.writeEvent(
                     EventLogTags.AM_CREATE_TASK, mStartActivity.userId, mStartActivity.task.taskId);
         }
+		
         ActivityStack.logStartActivity(
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.task);
         mTargetStack.mLastPausedActivity = null;
 
         sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
-
+		
+         //--------------------logStartActivity---------------------->
         mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
             if (!mLaunchTaskBehind) {

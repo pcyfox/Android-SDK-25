@@ -1137,9 +1137,17 @@ final class ActivityStack {
                 EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
                         prev.userId, System.identityHashCode(prev),
                         prev.shortComponentName);
-                mService.updateUsageStats(prev, false);
+                mService.updateUsageStats(prev, false); 
+				
+				//函数首先把mResumedActivity(执行启动的Activity)保存在本地变量prev中.
+				//因此，通过启动者进程中的ApplicationThread对象这个mResumedActivity它要进入Paused状态,
+				//具体是通过调用这个远程接口的schedulePauseActivity来通知Launcher进入Paused状态
+			
+		
+				//-----------------------schedulePauseActivity--------------------->
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
                         userLeaving, prev.configChangeFlags, dontWait);
+				
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
@@ -2270,6 +2278,7 @@ final class ActivityStack {
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
+			//----------------------startPausingLocked---------------------------------->
             pausing |= startPausingLocked(userLeaving, false, next, dontWaitForPause);
         }
         if (pausing) {
