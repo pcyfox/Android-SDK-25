@@ -846,6 +846,7 @@ public abstract class Animation implements Cloneable {
         final long startOffset = getStartOffset();
         final long duration = mDuration;
         float normalizedTime;
+		//计算当前时间流失比
         if (duration != 0) {
             normalizedTime = ((float) (currentTime - (mStartTime + startOffset))) /
                     (float) duration;
@@ -853,7 +854,7 @@ public abstract class Animation implements Cloneable {
             // time is a step-change with a zero duration
             normalizedTime = currentTime < mStartTime ? 0.0f : 1.0f;
         }
-
+        //判断动画是否已经完成或取消
         final boolean expired = normalizedTime >= 1.0f || isCanceled();
         mMore = !expired;
 
@@ -873,7 +874,7 @@ public abstract class Animation implements Cloneable {
             if (mCycleFlip) {
                 normalizedTime = 1.0f - normalizedTime;
             }
-
+            //通过插值器计算执行百分比
             final float interpolatedTime = mInterpolator.getInterpolation(normalizedTime);
             applyTransformation(interpolatedTime, outTransformation);
         }

@@ -2056,6 +2056,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
+		
+		//向日志中写入PackageManagerService启动事件
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
 
@@ -2064,10 +2066,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mContext = context;
+		//开机模式是否为工厂测试模式
         mFactoryTest = factoryTest;
+		//是否仅启动内核
         mOnlyCore = onlyCore;
+		//构建DisplayMetrics对象以供获取设备屏幕消息
         mMetrics = new DisplayMetrics();
         mSettings = new Settings(mPackages);
+		//添加一些用户UID
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID,
@@ -2080,7 +2086,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
-
+       //判断是否在不同进程
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
             if ("*".equals(separateProcesses)) {
@@ -2097,7 +2103,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mDefParseFlags = 0;
             mSeparateProcesses = null;
         }
-
+       //installer由SystemService构造
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
@@ -2118,11 +2124,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
+			//启动消息处理线程，使用其Looper对象构造一个
             mHandlerThread = new ServiceThread(TAG,
                     Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
+			
             mProcessLoggingHandler = new ProcessLoggingHandler();
+			//使用看门狗监测mHandler
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(this);
@@ -2130,10 +2139,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             File dataDir = Environment.getDataDirectory();
 			//获取/data/app目录
             mAppInstallDir = new File(dataDir, "app");
-			
+			//获取/data/app-lib目录
             mAppLib32InstallDir = new File(dataDir, "app-lib");
+			//获取/data/app-ephemeral目录
             mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
+			//获取/data/app-asec目录
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
+			//获取/data/app-private目录
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
             sUserManager = new UserManagerService(context, this, mPackages);
@@ -2152,13 +2164,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     bp.setGids(perm.gids, perm.perUser);
                 }
             }
-
+            //共享库
             ArrayMap<String, String> libConfig = systemConfig.getSharedLibraries();
             for (int i=0; i<libConfig.size(); i++) {
                 mSharedLibraries.put(libConfig.keyAt(i),
                         new SharedLibraryEntry(libConfig.valueAt(i), null));
             }
-
+            //读取并解析mac_permissions.xml
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
@@ -2178,7 +2190,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (mFirstBoot) {
                 requestCopyPreoptedFiles();
             }
-
+            //判断是否有自定解析页面
             String customResolverActivity = Resources.getSystem().getString(
                     R.string.config_customResolverActivity);
             if (TextUtils.isEmpty(customResolverActivity)) {
@@ -2187,7 +2199,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mCustomResolverComponentName = ComponentName.unflattenFromString(
                         customResolverActivity);
             }
-
+            //记录扫描开始时间
             long startTime = SystemClock.uptimeMillis();
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,
@@ -2196,7 +2208,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
             final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING | SCAN_INITIAL;
-
+            //获取java启动类库路径
             final String bootClassPath = System.getenv("BOOTCLASSPATH");
             final String systemServerClassPath = System.getenv("SYSTEMSERVERCLASSPATH");
 
@@ -2214,6 +2226,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             allInstructionSets.toArray(new String[allInstructionSets.size()]));
 
             /**
+			 *确保所有外部的类库都经过dexopt优化过
              * Ensure all external libraries have had dexopt run on them.
              */
             if (mSharedLibraries.size() > 0) {
@@ -2257,7 +2270,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
 
-            // when upgrading from pre-M, promote system app permissions from install to runtime
+            // when upgrading（升级） from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
 
@@ -2309,7 +2322,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
-            // Collect all vendor packages.
+            // Collect all vendor packages.（根据Google规范，手机厂商的APP应该放在这里，事实上然并卵）
             File vendorAppDir = new File("/vendor/app");
             try {
                 vendorAppDir = vendorAppDir.getCanonicalFile();
@@ -2326,7 +2339,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
-            // Prune any system packages that no longer exist.
+            // Prune（删除; 剪去; 精简某事物，除去某事物多余的部分） any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<String>();
             if (!mOnlyCore) {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
@@ -2347,6 +2360,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final PackageParser.Package scannedPkg = mPackages.get(ps.name);
                     if (scannedPkg != null) {
                         /*
+						 *OTA升级包检测
                          * If the system app is both scanned and in the
                          * disabled packages list, then it must have been
                          * added via OTA. Remove it from the currently

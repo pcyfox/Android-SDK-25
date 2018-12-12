@@ -781,8 +781,8 @@ public class PackageParser {
     }
 
     /**
-     * Parse the package at the given location. Automatically detects if the
-     * package is a monolithic style (single APK file) or cluster style
+     * Parse the package at the given location. Automatically detects(查明) if the
+     * package is a monolithic(整体的;) style (single APK file) or cluster style
      * (directory of APKs).
      * <p>
      * This performs sanity checking on cluster style packages, such as
@@ -3404,7 +3404,8 @@ public class PackageParser {
         mParseActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
         mParseActivityArgs.sa = sa;
         mParseActivityArgs.flags = flags;
-
+        //此Activity非四大组件之一的Activity，它是Component的子类，是一个解释器，
+	    //承担解释AndroidMeanifest中的Activity及BroadCast节点
         Activity a = new Activity(mParseActivityArgs, new ActivityInfo());
         if (outError[0] != null) {
             sa.recycle();

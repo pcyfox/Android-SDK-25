@@ -2197,13 +2197,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0;
             TouchTarget newTouchTarget = null;
             boolean alreadyDispatchedToNewTouchTarget = false;
+			//事件未被取消并未被拦截
             if (!canceled && !intercepted) {
 
                 // If the event is targeting accessiiblity focus we give it to the
                 // view that has accessibility focus and if it does not handle it
                 // we clear the flag and dispatch the event to all children as usual.
                 // We are looking up the accessibility focused host to avoid keeping
-                // state since these events are very rare.
+                // state since these events are very rare（罕见的）.
                 View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
                         ? findChildWithAccessibilityFocus() : null;
 
@@ -2228,6 +2229,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         final boolean customOrder = preorderedList == null
                                 && isChildrenDrawingOrderEnabled();
                         final View[] children = mChildren;
+						
                         for (int i = childrenCount - 1; i >= 0; i--) {
                             final int childIndex = getAndVerifyPreorderedIndex(
                                     childrenCount, i, customOrder);
@@ -2245,7 +2247,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 childWithAccessibilityFocus = null;
                                 i = childrenCount - 1;
                             }
-
+                           //如果child无法接收event或者出发点没在child的边界内
                             if (!canViewReceivePointerEvents(child)
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
                                 ev.setTargetAccessibilityFocus(false);
@@ -2261,6 +2263,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             }
 
                             resetCancelNextUpFlag(child);
+							//开始分发事件
                             if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
                                 // Child wants to receive touch within its bounds.
                                 mLastTouchDownTime = ev.getDownTime();
@@ -2599,6 +2602,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (child == null) {
                 handled = super.dispatchTouchEvent(event);
             } else {
+				//向child传递cancel事件
                 handled = child.dispatchTouchEvent(event);
             }
             event.setAction(oldAction);
@@ -2609,15 +2613,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int oldPointerIdBits = event.getPointerIdBits();
         final int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
 
-        // If for some reason we ended up in an inconsistent state where it looks like we
+        // If for some reason we ended up in an inconsistent（不一致的） state where it looks like we
         // might produce a motion event with no pointers in it, then drop the event.
         if (newPointerIdBits == 0) {
             return false;
         }
 
-        // If the number of pointers is the same and we don't need to perform any fancy
-        // irreversible transformations, then we can reuse the motion event for this
-        // dispatch as long as we are careful to revert any changes we make.
+        // If the number of pointers is the same and we don't need to perform any fancy（昂贵的）
+        // irreversible（不可逆的; 不能翻转的; 不能倒置的） transformations, then we can reuse the motion event for this
+        // dispatch as long as we are careful to revert（恢复） any changes we make.
         // Otherwise we need to make a copy.
         final MotionEvent transformedEvent;
         if (newPointerIdBits == oldPointerIdBits) {

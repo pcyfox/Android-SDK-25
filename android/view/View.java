@@ -13653,6 +13653,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (p != null && ai != null && l < r && t < b) {
                 final Rect damage = ai.mTmpInvalRect;
                 damage.set(l, t, r, b);
+				//ViewGroup
                 p.invalidateChild(this, damage);
             }
 
@@ -16754,6 +16755,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+	 *效用函数
      * Utility function, called by draw(canvas, parent, drawingTime) to handle the less common
      * case of an active Animation being run on the view.
      */
@@ -16762,14 +16764,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         Transformation invalidationTransform;
         final int flags = parent.mGroupFlags;
         final boolean initialized = a.isInitialized();
+		//如果动画没有初始化就先初始化
         if (!initialized) {
             a.initialize(mRight - mLeft, mBottom - mTop, parent.getWidth(), parent.getHeight());
             a.initializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
             if (mAttachInfo != null) a.setListenerHandler(mAttachInfo.mHandler);
-            onAnimationStart();
+            onAnimationStart();//触发回调
         }
-
+        //Transformation中存储了View的动画消息
         final Transformation t = parent.getChildTransformation();
+		//调用Animation的getTransformation（）方法，计算并获取动画的相关值
         boolean more = a.getTransformation(drawingTime, t, 1f);
         if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
             if (parent.mInvalidationTransformation == null) {
@@ -16782,6 +16786,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (more) {
+			//判断动画是否会改变其边界
             if (!a.willChangeBounds()) {
                 if ((flags & (ViewGroup.FLAG_OPTIMIZE_INVALIDATE | ViewGroup.FLAG_ANIMATION_DONE)) ==
                         ViewGroup.FLAG_OPTIMIZE_INVALIDATE) {
@@ -16792,7 +16797,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     parent.mPrivateFlags |= PFLAG_DRAW_ANIMATION;
                     parent.invalidate(mLeft, mTop, mRight, mBottom);
                 }
-            } else {
+            } else {//重绘新的区域
+				
                 if (parent.mInvalidateRegion == null) {
                     parent.mInvalidateRegion = new RectF();
                 }
@@ -16803,9 +16809,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // The child need to draw an animation, potentially offscreen, so
                 // make sure we do not cancel invalidate requests
                 parent.mPrivateFlags |= PFLAG_DRAW_ANIMATION;
-
+                //重新计算有效区域
                 final int left = mLeft + (int) region.left;
                 final int top = mTop + (int) region.top;
+				//刷新新的区域
                 parent.invalidate(left, top, left + (int) (region.width() + .5f),
                         top + (int) (region.height() + .5f));
             }
@@ -16856,6 +16863,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+	 *在ViewGroup.drawChild()中调用，以绘制每个子视图
      * This method is called by ViewGroup.drawChild() to have each child view draw itself.
      *
      * This is where the View specializes rendering behavior based on layer type,
@@ -16875,7 +16883,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean more = false;
         final boolean childHasIdentityMatrix = hasIdentityMatrix();
         final int parentFlags = parent.mGroupFlags;
-
+         //判断是否需要清除动画
         if ((parentFlags & ViewGroup.FLAG_CLEAR_TRANSFORMATION) != 0) {
             parent.getChildTransformation().clear();
             parent.mGroupFlags &= ~ViewGroup.FLAG_CLEAR_TRANSFORMATION;
@@ -16886,6 +16894,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean scalingRequired = mAttachInfo != null && mAttachInfo.mScalingRequired;
         final Animation a = getAnimation();
         if (a != null) {
+			//设置动画
             more = applyLegacyAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
             if (concatMatrix) {
