@@ -10013,13 +10013,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 result = true;
             }
             //noinspection SimplifiableIfStatement
+			//当设置有OnTouchListener时则调用OnTouchListener的onTouch方法
             ListenerInfo li = mListenerInfo;
             if (li != null && li.mOnTouchListener != null
                     && (mViewFlags & ENABLED_MASK) == ENABLED
                     && li.mOnTouchListener.onTouch(this, event)) {
                 result = true;
             }
-
+            //当设置没有mOnTouchListener时则调用onTouchEvent方法
+		    //在 onTouchEvent方法中MotionEvent.ACTION_UP时调用performClick()处理OnClickListener;
             if (!result && onTouchEvent(event)) {
                 result = true;
             }
@@ -11213,6 +11215,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     mPerformClick = new PerformClick();
                                 }
                                 if (!post(mPerformClick)) {
+									//如果设置了ClickListener则调用它的onClick方法
                                     performClick();
                                 }
                             }

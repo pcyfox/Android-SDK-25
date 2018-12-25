@@ -3057,10 +3057,11 @@ public class Activity extends ContextThemeWrapper
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             onUserInteraction();
-        }
-        if (getWindow().superDispatchTouchEvent(ev)) {
+        }                   
+        if (getWindow().superDispatchTouchEvent(ev)) //将TouchEvent分发到tPhoneWindow，然后直接交给DecorView处理
             return true;
         }
+		//当没有视图处理该MotionEvent时，Activity的onTouchEvent会被调用
         return onTouchEvent(ev);
     }
 
