@@ -19865,8 +19865,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             int cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
-                // measure ourselves, this should set the measured dimension flag back
-				//测量子视图
+                // measure ourselves, this should set the measured dimension flag back 
+				//measure方法是final的不能被重载，可在子类中重载的onMeasure进行各自测量 （在抽象类ViewGroup中并没有重载 ）
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
                 mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
             } else {
