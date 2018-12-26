@@ -5485,7 +5485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setOnClickListener(@Nullable OnClickListener l) {
         if (!isClickable()) {
-            setClickable(true);
+            setClickable(true);//一旦添加了OnClickListener就会强制设置View的clickable为true
         }
         getListenerInfo().mOnClickListener = l;
     }
@@ -19866,6 +19866,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 // measure ourselves, this should set the measured dimension flag back
+				//测量子视图
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
                 mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
             } else {

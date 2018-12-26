@@ -2165,7 +2165,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cancelAndClearTouchTargets(ev);
                 resetTouchState();
             }
-
+            //一旦被赋值intercepted = true后，后续的MotionEvent.ACTION_MOVE及MotionEvent.ACTION_UP事件中将无法改变它的值.
+			//意味着子元素将没机会处理后续的事件，所以在使用外部拦截法时千万不能在MotionEvent.ACTION_DOWN中拦截事件
             // Check for interception.
             final boolean intercepted;
 			//由此可以得知只有在时MotionEvent.ACTION_DOWN时才可能被调用onInterceptTouchEvent
@@ -2282,7 +2283,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 }
                                 mLastTouchDownX = ev.getX();
                                 mLastTouchDownY = ev.getY();
-								//addTouchTarget方法中会使用child构建TouchTarget一个对象并赋值给mFirstTouchTarget
+								//addTouchTarget方法中会使用child构建TouchTarget（单向链表）一个对象并赋值给mFirstTouchTarget
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
@@ -2309,9 +2310,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             
             // Dispatch to touch targets.
-            if (mFirstTouchTarget == null) {//这种情况可能是事件被拦截或事件被取消或是根本没有子元素也可能是没有合适子视图来接盘
+			
+			//mFirstTouchTarget == null这种情况可能是1、事件被拦截或事件被取消
+			//2、是根本没有子元素
+			//3、也可能是子视图处理了事件，但在dispatchTouchEvent中返回了false
+            if (mFirstTouchTarget == null) {
 				// No touch targets so treat this as an ordinary view.
-				//没有一个正常的视图处理该点击事件
+				//没有一个正常的视图处理该点击事件时，自己处理。
 			    //当第三个参数child为null时会调用super.dispatchTouchEvent(event)，即调用View的dispatchTouchEvent
 				//View的dispatchTouchEvent中会调用OnTouchListener的onTouch或View的onTouchEvent方法消费事件
                 handled = dispatchTransformedTouchEvent(ev, canceled, null,

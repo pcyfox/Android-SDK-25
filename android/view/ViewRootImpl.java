@@ -104,7 +104,7 @@ import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /**
- *
+ *视图层的顶端，实现了View与间WindowManager必要的协议（View与间WindowManager间沟通的桥梁）
  * The top of a view hierarchy, implementing the needed protocol between View
  * and the WindowManager.  This is for the most part an internal implementation
  * detail of {@link WindowManagerGlobal}.
@@ -1449,7 +1449,11 @@ public final class ViewRootImpl implements ViewParent,
         final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return (int) (displayMetrics.density * dip + 0.5f);
     }
-    //执行测量、布局、绘制
+	
+    //执行测量、布局、绘制，对于应用层View的绘制工作就是从这里开启的
+	//1、先执行performMeasure从DecorView开始从上至下测量整个视图树，
+	//2、再执行performLayout开始从上至下布置整个视图树
+	//3、再执行performDraw开始从上至下绘制个视图树
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
@@ -2027,8 +2031,10 @@ public final class ViewRootImpl implements ViewParent,
                             + " mHeight=" + mHeight
                             + " measuredHeight=" + host.getMeasuredHeight()
                             + " coveredInsetsChanged=" + contentInsetsChanged);
-
-                     // Ask host how big it wants to be
+					
+					
+	                //-------------------------------------1---------------------------------------------------------------
+                    // Ask host how big it wants to be
 					//最终会调用View的measure方法，从DecorView开始，测量所有View
                     performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
 
@@ -2075,6 +2081,8 @@ public final class ViewRootImpl implements ViewParent,
         boolean triggerGlobalLayoutListener = didLayout
                 || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
+			
+			//-------------------------------------2---------------------------------------------------------------
 			//布置View
             performLayout(lp, mWidth, mHeight);
 
@@ -2222,6 +2230,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
+			
+			//-------------------------------------3---------------------------------------------------------------
             //绘制View
             performDraw();
         } else {

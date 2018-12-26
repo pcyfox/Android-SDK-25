@@ -1807,7 +1807,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public boolean superDispatchTouchEvent(MotionEvent event) {
-        return mDecor.superDispatchTouchEvent(event);//直接将事件交给Activity的顶级视图处理
+		//直接将事件交给Activity的顶级视图处理，mDecor中调用父类（ViewGroup）的dispatchTouchEvent。
+        return mDecor.superDispatchTouchEvent(event);
     }
 
     @Override
