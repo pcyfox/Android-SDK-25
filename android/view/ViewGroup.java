@@ -6033,6 +6033,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * ViewGroupb并未实现onMeasure（）方法，
      * Ask all of the children of this view to measure themselves, taking into
      * account both the MeasureSpec requirements for this view and its padding.
      * We skip children that are in the GONE state The heavy lifting is done in
@@ -6063,13 +6064,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected void measureChild(View child, int parentWidthMeasureSpec,
             int parentHeightMeasureSpec) {
+    	//取出每个子元素的LayoutParams
         final LayoutParams lp = child.getLayoutParams();
-
+        //根据measureChildren参数、parentWidthMeasureSpec及子元素的LayoutParams构建子元素的MeasureSpec对象
         final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
                 mPaddingLeft + mPaddingRight, lp.width);
         final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
                 mPaddingTop + mPaddingBottom, lp.height);
-
+        //在measure方法中调用各个子元素onMeasure方法完成具体绘制
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 

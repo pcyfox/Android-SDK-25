@@ -477,7 +477,7 @@ public class Handler {
         if (timeout < 0) {
             throw new IllegalArgumentException("timeout must be non-negative");
         }
-
+        //判断当前线程是否与创建的Handler所在线程一致
         if (Looper.myLooper() == mLooper) {
             r.run();
             return true;

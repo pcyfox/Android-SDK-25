@@ -6623,7 +6623,7 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
-        //创建Activity对应的窗口
+        //创建Activity对应的窗口同时也会创建DecorView
         mWindow = new PhoneWindow(this, window);
         mWindow.setWindowControllerCallback(this);
         mWindow.setCallback(this);

@@ -415,7 +415,7 @@ public final class ViewRootImpl implements ViewParent,
         mWindowSession = WindowManagerGlobal.getWindowSession();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
-		//获取创建ViewRootImpl实例的线程，即主线程，只允许在该线程更新UI
+		//获取创建ViewRootImpl实例的线程
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();
@@ -1451,6 +1451,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 	
     //执行测量、布局、绘制，对于应用层View的绘制工作就是从这里开启的
+    //串行执行：
 	//1、先执行performMeasure从DecorView开始从上至下测量整个视图树，
 	//2、再执行performLayout开始从上至下布置整个视图树
 	//3、再执行performDraw开始从上至下绘制个视图树
@@ -1536,7 +1537,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
                 host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
             }
-            host.dispatchAttachedToWindow(mAttachInfo, 0);
+
+			host.dispatchAttachedToWindow(mAttachInfo, 0);
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             dispatchApplyInsets(host);
             //Log.i(mTag, "Screen on initialized: " + attachInfo.mKeepScreenOn);

@@ -308,6 +308,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // context that was given to them.
         mUseDecorContext = true;
         if (preservedWindow != null) {
+        	//创建或创建DecorView实例
             mDecor = (DecorView) preservedWindow.getDecorView();
             mElevation = preservedWindow.getElevation();
             mLoadElevation = false;

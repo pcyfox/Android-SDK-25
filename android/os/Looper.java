@@ -98,6 +98,7 @@ public final class Looper {
      * to call this function yourself.  See also: {@link #prepare()}
      */
     public static void prepareMainLooper() {
+    	//创建Looper对象
         prepare(false);
         synchronized (Looper.class) {
             if (sMainLooper != null) {
@@ -135,7 +136,7 @@ public final class Looper {
         for (;;) {
             Message msg = queue.next(); // might block
             if (msg == null) {
-                // No message indicates that the message queue is quitting.
+                // No message indicates that the message queue is quitting.//没有消息可能意味着消息队列退出了
                 return;
             }
 
@@ -151,6 +152,7 @@ public final class Looper {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
             try {
+            	//处理消息，注意这是在在创建Looper对象的线程线程中执行，意味着接下来Handler的handleMessage方法将在创建Looper对象的线程线程中执行
                 msg.target.dispatchMessage(msg);
             } finally {
                 if (traceTag != 0) {

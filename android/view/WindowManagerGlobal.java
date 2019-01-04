@@ -328,7 +328,7 @@ public final class WindowManagerGlobal {
                     }
                 }
             }
-            //构建ViewRootImpl实例，ViewRootImpl是FrameWork层与Native层的通讯桥梁
+            //构建ViewRootImpl实例
             root = new ViewRootImpl(view.getContext(), display);
             view.setLayoutParams(wparams);
             //缓存实例
@@ -339,6 +339,7 @@ public final class WindowManagerGlobal {
 
         // do this last because it fires off messages to start doing things
         try {
+        	//通过WMS添加view
             root.setView(view, wparams, panelParentView);
         } catch (RuntimeException e) {
             // BadTokenException or InvalidDisplayException, clean up.

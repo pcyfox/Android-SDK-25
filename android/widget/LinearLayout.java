@@ -633,7 +633,7 @@ public class LinearLayout extends ViewGroup {
     public void setWeightSum(float weightSum) {
         mWeightSum = Math.max(0.0f, weightSum);
     }
-
+    //这个方法在View中有具体而ViewGroup中是没有的
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mOrientation == VERTICAL) {
