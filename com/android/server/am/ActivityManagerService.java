@@ -1780,7 +1780,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     performAppGcsIfAppropriateLocked();
                 }
             } break;
-            case SERVICE_TIMEOUT_MSG: {
+            case SERVICE_TIMEOUT_MSG: {//Service Timeout:比如前台服务在20s内未执行完成
                 if (mDidDexOpt) {
                     mDidDexOpt = false;
                     Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
