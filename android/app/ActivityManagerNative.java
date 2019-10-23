@@ -3047,7 +3047,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
     private static final Singleton<IActivityManager> gDefault = new Singleton<IActivityManager>() {
         protected IActivityManager create() {
-			//绑定系统服务的AMS返回的Binder
+			//绑定系统服务AMS返回的Binder
             IBinder b = ServiceManager.getService("activity");
             if (false) {
                 Log.v("ActivityManager", "default service binder = " + b);

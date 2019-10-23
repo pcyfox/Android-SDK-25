@@ -832,6 +832,7 @@ public final class ActivityThread {
 		}
 
 		// 当在attach方法中将ApplicationThread与AMS关联后会被调用
+		@Override
 		public final void bindApplication(String processName, ApplicationInfo appInfo, List<ProviderInfo> providers,
 				ComponentName instrumentationName, ProfilerInfo profilerInfo, Bundle instrumentationArgs,
 				IInstrumentationWatcher instrumentationWatcher, IUiAutomationConnection instrumentationUiConnection,
@@ -5847,17 +5848,18 @@ public final class ActivityThread {
 
 		return retHolder;
 	}
-//主要干两件事件1、绑定Application（创建），2、检测机所占内存看是否需要需要回收内存
+   //主要干两件事件:1、绑定Application（创建），2、检测所占内存看是否需要需要回收内存
 	private void attach(boolean system) {
 		sCurrentActivityThread = this;
 		mSystemThread = system;
-		if (!system) {// 非系统用用
+		if (!system) {// 非系统用用 main()方法中调用该方法是传的就是false
 			ViewRootImpl.addFirstDrawHandler(new Runnable() {
 				@Override
 				public void run() {
 					ensureJitEnabled();
 				}
 			});
+			
 			android.ddm.DdmHandleAppName.setAppName("<pre-initialized>", UserHandle.myUserId());
 
 			RuntimeInit.setApplicationObject(mAppThread.asBinder());
@@ -5865,7 +5867,7 @@ public final class ActivityThread {
 			try {
 				// 通过跨进程调用AMS的attachApplication方法，将ApplicationThread这个Binder对象与AMS进行关联，
 				// 实现两者间相互远程调用，通讯接口为IApplicationThread。
-				// 该方法会远程调用ApplicationThread的bindApplication方法执行Application初始化的相关工作
+				// 该方法最终会远程调用ApplicationThread的bindApplication方法执行Application初始化的相关工作
 				mgr.attachApplication(mAppThread);
 			} catch (RemoteException ex) {
 				throw ex.rethrowFromSystemServer();
@@ -6028,8 +6030,8 @@ public final class ActivityThread {
 		Process.setArgV0("<pre-initialized>");
 		// 初始化主线程中Looper实例，并保存至ThreadLocal中
 		Looper.prepareMainLooper();
-		ActivityThread thread = new ActivityThread();
 		
+		ActivityThread thread = new ActivityThread();
 		thread.attach(false);
 
 		if (sMainThreadHandler == null) {
