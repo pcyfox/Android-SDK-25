@@ -562,7 +562,7 @@ public final class MessageQueue {
                 // and the message is the earliest asynchronous message in the queue.
                 needWake = mBlocked && p.target == null && msg.isAsynchronous();
                 Message prev;
-                for (;;) {
+                for (;;) {//以自旋方式保证线程安全
                     prev = p;
                     p = p.next;
                     if (p == null || when < p.when) {

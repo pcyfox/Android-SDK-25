@@ -3652,6 +3652,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         checkTime(startTime, "startProcess: stepping in to startProcess");
+        //---------------------------------------》
         startProcessLocked(
                 app, hostingType, hostingNameStr, abiOverride, entryPoint, entryPointArgs);
         checkTime(startTime, "startProcess: done starting proc!");
@@ -3795,6 +3796,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
             checkTime(startTime, "startProcess: asking zygote to start proc");
+            //---------------创建进程--------------------------------------->
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
@@ -4324,11 +4326,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-
+   //实现IActivityManager中的startActivity，能通过Binder调用的
     @Override
     public final int startActivity(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions) {
+    	
         return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
                 resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());

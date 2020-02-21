@@ -58,11 +58,11 @@ import com.android.internal.os.IResultReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//这个类逻辑与通过aidl生成的模版一模一样的
 /** {@hide} */
 public abstract class ActivityManagerNative extends Binder implements IActivityManager
 {
-    /**
+    /** 
      * Cast a Binder object into an activity manager interface, generating
      * a proxy if needed.
      */
@@ -72,7 +72,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
         IActivityManager in =
             (IActivityManager)obj.queryLocalInterface(descriptor);
-        if (in != null) {
+        if (in != null) {//当in不为null说明调用asInterface()的进程与需要获取的服务进程是同一个进程
             return in;
         }
         //IActivityManager代理
@@ -3052,7 +3052,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (false) {
                 Log.v("ActivityManager", "default service binder = " + b);
             }
-			//获取代理
+		
             IActivityManager am = asInterface(b);
             if (false) {
                 Log.v("ActivityManager", "default service = " + am);
@@ -3064,6 +3064,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
 class ActivityManagerProxy implements IActivityManager
 {
+	
     public ActivityManagerProxy(IBinder remote)
     {
         mRemote = remote;

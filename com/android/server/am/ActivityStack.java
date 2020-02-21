@@ -2583,6 +2583,7 @@ final class ActivityStack {
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Restarting " + next);
+            //------------------关键点------------------------------》
             mStackSupervisor.startSpecificActivityLocked(next, true, true);
         }
 

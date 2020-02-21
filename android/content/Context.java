@@ -70,6 +70,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * 这是外观模式在Android中的典型应用
  * Interface to global information about an application environment.  This is
  * an abstract class whose implementation is provided by
  * the Android system.  It

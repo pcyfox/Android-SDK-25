@@ -213,6 +213,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
+     * 注意,这是一个静态对象,虽然同一个AsyncTask的execute()方法不能被多次调用,但是创建多个AsyncTask对象却是可以共享这个执行器,
+     * 这意味着所有AsyncTask提交任务都是默认添加到这个执行器的队列当中并使用同一个线程池来执行任务.
+     * 使用线程池窜行执行任务的执行器
      * An {@link Executor} that executes tasks one at a time in serial
      * order.  This serialization is global to a particular process.
      */
@@ -237,6 +240,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
         Runnable mActive;
 
         public synchronized void execute(final Runnable r) {
+        	//将需要执行的Runnable对象r加入队列
             mTasks.offer(new Runnable() {
                 public void run() {
                     try {
@@ -246,6 +250,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
                     }
                 }
             });
+            //启动线程池执行任务
             if (mActive == null) {
                 scheduleNext();
             }
@@ -302,6 +307,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
                 try {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     //noinspection unchecked
+                    //执行后台任务
                     result = doInBackground(mParams);
                     Binder.flushPendingCommands();
                 } catch (Throwable tr) {
@@ -603,6 +609,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     @MainThread
     public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
             Params... params) {
+    	//这里就决定了AsyncTask不能同时提交多个任务,并且execute()方法不能多次被执行(任务执行完成或被取消后mStatus会被赋值为FINISHED)
         if (mStatus != Status.PENDING) {
             switch (mStatus) {
                 case RUNNING:
@@ -616,12 +623,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
         }
 
         mStatus = Status.RUNNING;
-
         onPreExecute();
-
         mWorker.mParams = params;
         exec.execute(mFuture);
-
         return this;
     }
 

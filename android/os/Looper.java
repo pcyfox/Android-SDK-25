@@ -152,6 +152,7 @@ public final class Looper {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
             try {
+            	//target就是发送这个Msg的那个Handler对象
             	//处理消息，注意这是在在创建Looper对象的线程线程中执行，意味着接下来Handler的handleMessage方法将在创建Looper对象的线程线程中执行
                 msg.target.dispatchMessage(msg);
             } finally {

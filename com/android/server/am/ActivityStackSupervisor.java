@@ -1306,6 +1306,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 app.pendingUiClean = true;
             }
             app.forceProcessStateUpTo(mService.mTopProcessState);
+            //通过实现IApplicationThread的binder
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
                     new Configuration(task.mOverrideConfig), r.compat, r.launchedFromPackage,
@@ -1405,6 +1406,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     app.addPackage(r.info.packageName, r.info.applicationInfo.versionCode,
                             mService.mProcessStats);
                 }
+                
+                //--------------------------------------------------->
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
@@ -1415,7 +1418,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // If a dead object exception was thrown -- fall through to
             // restart the application.
         }
-
+       //启动新的进程，会通过zygote进程fork创建
         mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
                 "activity", r.intent.getComponent(), false, false, true);
     }

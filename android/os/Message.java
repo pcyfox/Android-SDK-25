@@ -108,7 +108,7 @@ public final class Message implements Parcelable {
     /*package*/ Message next;
 
     private static final Object sPoolSync = new Object();
-    private static Message sPool;
+    private static Message sPool;//这个pool实在太特别了......
     private static int sPoolSize = 0;
 
     private static final int MAX_POOL_SIZE = 50;

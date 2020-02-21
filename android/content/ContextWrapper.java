@@ -44,6 +44,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * 装饰器模式在android中的典型应用Context是被装饰者是组件的抽象它的具体实现是ContextImpl，
+ * ContextWrapper是装饰器基类，它的直接子类有ContextThemeWrapper、Application、而ContextThemeWrapper的子类有Activity、Service等
+ * 在ActivityThread的performLaunchActivity（）方法中创建完Activity实例后会调用createBaseContextForActivity（）创建适合Activity的ContextImpl实例并通过
+ * activity的attach（）方法交给activity
  * Proxying implementation of Context that simply delegates all of its calls to
  * another Context.  Can be subclassed to modify behavior without changing
  * the original Context.

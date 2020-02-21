@@ -3045,6 +3045,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * 责任链的触发点
      * Called to process touch screen events.  You can override this to
      * intercept all touch screen events before they are dispatched to the
      * window.  Be sure to call this implementation for touch screen events
@@ -3057,8 +3058,9 @@ public class Activity extends ContextThemeWrapper
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             onUserInteraction();
-        }                   
-        if (getWindow().superDispatchTouchEvent(ev)) //将TouchEvent分发到tPhoneWindow，然后直接交给DecorView处理
+        }
+        //将TouchEvent分发到具体实现类PhoneWindow，其内部是直接交给DecorView处理
+		if (getWindow().superDispatchTouchEvent(ev)) 
             return true;
         }
 		//当没有视图处理该MotionEvent时，Activity的onTouchEvent会被调用
@@ -4222,14 +4224,13 @@ public class Activity extends ContextThemeWrapper
             @Nullable Bundle options) {
         if (mParent == null) {
             options = transferSpringboardActivityOptions(options);
+            //通过mInstrumentation的execStartActivity（）方法启动activity，mInstrumentation是在attach（）中被初始化的
 			//mMainThread即ActivityThread实例，在performLaunchActivity方法中 activity的attach方时赋值
-            Instrumentation.ActivityResult ar =
-                mInstrumentation.execStartActivity(
+            Instrumentation.ActivityResult ar = mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
                     intent, requestCode, options);
 			
             if (ar != null) {
-				
                 mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(),
                     ar.getResultData());

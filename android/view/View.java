@@ -11714,10 +11714,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ListenerInfo li = mListenerInfo;
             if (li != null && li.mOnTouchListener != null
                     && (mViewFlags & ENABLED_MASK) == ENABLED
+            //-------- 第一 -------------------->
                     && li.mOnTouchListener.onTouch(this, event)) {
                 result = true;
             }
-
+            //-------- 第二 -------------------->
+            //接着在onTouchEvent（）里会先先调用OnLongClickListener的onLongClick（）再调用OnClickListener的onClick（）
             if (!result && onTouchEvent(event)) {
                 result = true;
             }
@@ -12898,6 +12900,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * 
      * Implement this method to handle touch screen motion events.
      * <p>
      * If this method is used to detect click actions, it is recommended that

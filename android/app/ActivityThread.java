@@ -204,10 +204,10 @@ public final class ActivityThread {
 	static volatile IPackageManager sPackageManager;
 
 	final ApplicationThread mAppThread = new ApplicationThread();
-	
+
 	final Looper mLooper = Looper.myLooper();
 	final H mH = new H();
-	
+
 	final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
 	// List of new activities (via ActivityRecord.nextIdle) that should
 	// be reported when next we idle.
@@ -228,6 +228,7 @@ public final class ActivityThread {
 	// set of instantiated backup agents, keyed by package name
 	final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
 	/** Reference to singleton {@link ActivityThread} */
+	// 单例在Android中的典型应用
 	private static volatile ActivityThread sCurrentActivityThread;
 	Instrumentation mInstrumentation;
 	String mInstrumentationPackageName = null;
@@ -644,7 +645,8 @@ public final class ActivityThread {
 	}
 
 	private native void dumpGraphicsInfo(FileDescriptor fd);
-    //这是一个Binder对象
+
+	// 这是一个Binder对象，主要用于接收AMS消息，当进程启动后会把它传递给AMS
 	private class ApplicationThread extends ApplicationThreadNative {
 		private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
@@ -698,7 +700,8 @@ public final class ActivityThread {
 			sendMessage(H.SEND_RESULT, res);
 		}
 
-		// startActivity()(启动Activity的进程)--AMS(系统进程)-->...ActivitySatckSuperisor.realStartActivity()--->（新启动的进程）
+		// startActivity()(启动Activity的进程 是通过AMS的startProcessLocked方法)--AMS(系统进程)-->...ActivitySatckSuperisor.realStartActivityLocked()
+		//--->app.thread.scheduleLaunchActivity()---------->通知新启动的进程启动Activity
 		// we use token to identify this activity without having to send the
 		// activity itself back to the activity manager. (matters more with ipc)
 		@Override
@@ -2564,7 +2567,7 @@ public final class ActivityThread {
 		Activity activity = null;
 		try {
 			java.lang.ClassLoader cl = r.packageInfo.getClassLoader();
-			// 通过ClassLoader创建Activity实例
+			// 通过ClassLoader创建Activity实例,这是反射在Android中的典型运用
 			activity = mInstrumentation.newActivity(cl, component.getClassName(), r.intent);
 			StrictMode.incrementExpectedActivityCount(activity.getClass());
 			r.intent.setExtrasClassLoader(cl);
@@ -3372,7 +3375,7 @@ public final class ActivityThread {
 		}
 		// Slog.i(TAG, "Running services: " + mServices);
 	}
-    
+
 	public final ActivityClientRecord performResumeActivity(IBinder token, boolean clearHide, String reason) {
 		ActivityClientRecord r = mActivities.get(token);
 		if (localLOGV)
@@ -3479,7 +3482,7 @@ public final class ActivityThread {
 				// 在PhoneWindow中获取或创建创建DecorView实例（当DecorView不存在时）
 				View decor = r.window.getDecorView();
 				decor.setVisibility(View.INVISIBLE);
-				ViewManager wm = a.getWindowManager();//WindowManagerImpl
+				ViewManager wm = a.getWindowManager();// WindowManagerImpl
 				WindowManager.LayoutParams l = r.window.getAttributes();
 				a.mDecor = decor;
 				l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -3500,8 +3503,8 @@ public final class ActivityThread {
 				// 同时也会添加一个对应的ViewRootImpl对象用于执行跨进程添加视图绘制
 				if (a.mVisibleFromClient && !a.mWindowAdded) {
 					a.mWindowAdded = true;
-					//WindowManageImpl中addView会调用WindowManagerGlobal.addView（）在这里将第一次初始化ViewRootImpl
-					//因此在Activity的onCreate（）中ViewRootImpl为null，可以在非主线程更新UI。
+					// WindowManageImpl中addView会调用WindowManagerGlobal.addView（）在这里将第一次初始化ViewRootImpl
+					// 因此在Activity的onCreate（）中ViewRootImpl为null，可以在非主线程更新UI。
 					wm.addView(decor, l);
 				}
 
@@ -4249,9 +4252,8 @@ public final class ActivityThread {
 	}
 
 	/**
-	 * @param preserveWindow
-	 *            Whether the activity should try to reuse the window it created,
-	 *            including the decor view after the relaunch.
+	 * @param preserveWindow Whether the activity should try to reuse the window it
+	 *                       created, including the decor view after the relaunch.
 	 */
 	public final void requestRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
 			List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed, Configuration config,
@@ -4564,13 +4566,11 @@ public final class ActivityThread {
 	 * Configuration for that Activity. {@link ActivityClientRecord#tmpConfig} is
 	 * used as a temporary for delivering the updated Configuration.
 	 * 
-	 * @param r
-	 *            ActivityClientRecord representing the Activity.
-	 * @param newBaseConfig
-	 *            The new configuration to use. This may be augmented with
-	 *            {@link ActivityClientRecord#overrideConfig}.
-	 * @param reportToActivity
-	 *            true if the change should be reported to the Activity's callback.
+	 * @param r                ActivityClientRecord representing the Activity.
+	 * @param newBaseConfig    The new configuration to use. This may be augmented
+	 *                         with {@link ActivityClientRecord#overrideConfig}.
+	 * @param reportToActivity true if the change should be reported to the
+	 *                         Activity's callback.
 	 */
 	private void performConfigurationChangedForActivity(ActivityClientRecord r, Configuration newBaseConfig,
 			boolean reportToActivity) {
@@ -4586,10 +4586,8 @@ public final class ActivityThread {
 	 * Creates a new Configuration only if override would modify base. Otherwise
 	 * returns base.
 	 * 
-	 * @param base
-	 *            The base configuration.
-	 * @param override
-	 *            The update to apply to the base configuration. Can be null.
+	 * @param base     The base configuration.
+	 * @param override The update to apply to the base configuration. Can be null.
 	 * @return A Configuration representing base with override applied.
 	 */
 	private static Configuration createNewConfigAndUpdateIfNotNull(@NonNull Configuration base,
@@ -4606,19 +4604,16 @@ public final class ActivityThread {
 	 * Decides whether to update an Activity's configuration and whether to tell the
 	 * Activity/Component about it.
 	 * 
-	 * @param cb
-	 *            The component callback to notify of configuration change.
-	 * @param activityToken
-	 *            The Activity binder token for which this configuration change
-	 *            happened. If the change is global, this is null.
-	 * @param newConfig
-	 *            The new configuration.
-	 * @param amOverrideConfig
-	 *            The override config that differentiates the Activity's
-	 *            configuration from the base global configuration. This is supplied
-	 *            by ActivityManager.
-	 * @param reportToActivity
-	 *            Notify the Activity of the change.
+	 * @param cb               The component callback to notify of configuration
+	 *                         change.
+	 * @param activityToken    The Activity binder token for which this
+	 *                         configuration change happened. If the change is
+	 *                         global, this is null.
+	 * @param newConfig        The new configuration.
+	 * @param amOverrideConfig The override config that differentiates the
+	 *                         Activity's configuration from the base global
+	 *                         configuration. This is supplied by ActivityManager.
+	 * @param reportToActivity Notify the Activity of the change.
 	 */
 	private void performConfigurationChanged(ComponentCallbacks2 cb, IBinder activityToken, Configuration newConfig,
 			Configuration amOverrideConfig, boolean reportToActivity) {
@@ -5848,7 +5843,8 @@ public final class ActivityThread {
 
 		return retHolder;
 	}
-   //主要干两件事件:1、绑定Application（创建），2、检测所占内存看是否需要需要回收内存
+
+	// 主要干两件事件:1、绑定Application（创建），2、检测所占内存看是否需要需要回收内存
 	private void attach(boolean system) {
 		sCurrentActivityThread = this;
 		mSystemThread = system;
@@ -5859,7 +5855,7 @@ public final class ActivityThread {
 					ensureJitEnabled();
 				}
 			});
-			
+
 			android.ddm.DdmHandleAppName.setAppName("<pre-initialized>", UserHandle.myUserId());
 
 			RuntimeInit.setApplicationObject(mAppThread.asBinder());
@@ -5882,14 +5878,14 @@ public final class ActivityThread {
 					Runtime runtime = Runtime.getRuntime();
 					long dalvikMax = runtime.maxMemory();
 					long dalvikUsed = runtime.totalMemory() - runtime.freeMemory();
-					//当内存占用超过四分之三时
+					// 当内存占用超过四分之三时
 					if (dalvikUsed > ((3 * dalvikMax) / 4)) {
 						if (DEBUG_MEMORY_TRIM)
 							Slog.d(TAG, "Dalvik max=" + (dalvikMax / 1024) + " total=" + (runtime.totalMemory() / 1024)
 									+ " used=" + (dalvikUsed / 1024));
 						mSomeActivitiesChanged = false;
 						try {
-							mgr.releaseSomeActivities(mAppThread);//回收一些Activity
+							mgr.releaseSomeActivities(mAppThread);// 回收一些Activity
 						} catch (RemoteException e) {
 							throw e.rethrowFromSystemServer();
 						}
@@ -6030,7 +6026,7 @@ public final class ActivityThread {
 		Process.setArgV0("<pre-initialized>");
 		// 初始化主线程中Looper实例，并保存至ThreadLocal中
 		Looper.prepareMainLooper();
-		
+
 		ActivityThread thread = new ActivityThread();
 		thread.attach(false);
 

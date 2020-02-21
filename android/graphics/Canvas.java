@@ -46,7 +46,7 @@ import libcore.util.NativeAllocationRegistry;
  * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html">
  * Canvas and Drawables</a> developer guide.</p></div>
  */
-public class Canvas {
+public class 	 {
     /** @hide */
     public static boolean sCompatibilityRestore = false;
 

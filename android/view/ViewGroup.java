@@ -110,6 +110,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#ViewGroup_layoutMode
  */
 @UiThread
+//组合模式在Android中的典型应用，增减、更新子项是ViewManager中定义的，而具体行为是在ViewParent中定义的
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
     private static final String TAG = "ViewGroup";
 
@@ -2165,16 +2166,37 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cancelAndClearTouchTargets(ev);
                 resetTouchState();
             }
-            //一旦被赋值intercepted = true后，后续的MotionEvent.ACTION_MOVE及MotionEvent.ACTION_UP事件中将无法改变它的值.
+            //由此可以看出当actionMasked == MotionEvent.ACTION_DOWN时，
+            //一旦onInterceptTouchEvent（）返回true，intercepted = true后，
+            //后续的MotionEvent.ACTION_MOVE及MotionEvent.ACTION_UP事件中将无法改变intercepted的值.因为只有
+            //actionMasked == MotionEvent.ACTION_DOWN时才会执行intercepted = onInterceptTouchEvent(ev)从而更新intercepted。
 			//意味着子元素将没机会处理后续的事件，所以在使用外部拦截法时千万不能在MotionEvent.ACTION_DOWN中拦截事件
             // Check for interception.
-            final boolean intercepted;
-			//由此可以得知只有在时MotionEvent.ACTION_DOWN时才可能被调用onInterceptTouchEvent
+            final boolean intercepted;//自己是否需要拦截该事件
+			//由此可以得知只有在时MotionEvent.ACTION_DOWN时才可能被调用onInterceptTouchEvent，以及检查FLAG_DISALLOW_INTERCEPT标识
             if (actionMasked == MotionEvent.ACTION_DOWN
                     || mFirstTouchTarget != null) {
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+                /**
+                 * 此处判断当前父控件是否不干预拦截事件，默认为false，
+                 * 会调用onInterceptTouchEvent(ev)判断是否拦截事件。
+                 * 一旦disallowIntercept等于true，就会直接走else，不拦截事件，
+                 * 也就不会调用onInterceptTouchEvent(ev)判断是否拦截事件。
+                 *
+                 * 子类可以通过requestDisallowInterceptTouchEvent()方法设置mGroupFlags。
+                 *
+                 * onInterceptTouchEvent(ev)默认返回false不拦截事件，
+                 * 继承自ViewGroup的子类可以重写该方法决定是否拦截事件，
+                 * 如果子控件调用了父控件的requestDisallowInterceptTouchEvent()方法，
+                 * 父控件就不会调用onInterceptTouchEvent(ev)方法了，
+                 * 此时的onInterceptTouchEvent(ev)是无效的。
+                 *
+                 * 如果拦截事件，intercepted会置为true，
+                 * 否则不拦截事件，intercepted会置为false。
+                 */
                 if (!disallowIntercept) {
-                    intercepted = onInterceptTouchEvent(ev);//判断当前ViewGroup是否要拦截该MotionEvent
+                	//判断当前ViewGroup是否要拦截该MotionEvent，并对intercepted赋值
+                    intercepted = onInterceptTouchEvent(ev);
                     ev.setAction(action); // restore action in case it was changed
                 } else {
                     intercepted = false;
@@ -2199,7 +2221,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0;
             TouchTarget newTouchTarget = null;
             boolean alreadyDispatchedToNewTouchTarget = false;
-			//事件未被取消并未被拦截
+			//事件未被取消也未未被拦截
             if (!canceled && !intercepted) {
 
                 // If the event is targeting accessiiblity focus we give it to the
@@ -2297,7 +2319,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
 
                     if (newTouchTarget == null && mFirstTouchTarget != null) {
-						//当没有找一个子元素接收事件时，将pointer安排个最后添加进来的那个视图
+						//当没有找一个子元素接收事件时，将pointer安排个最后添加进来的那个项处理
                         // Did not find a child to receive the event.
                         // Assign the pointer to the least recently added target.
                         newTouchTarget = mFirstTouchTarget;
@@ -2311,7 +2333,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             
             // Dispatch to touch targets.
 			
-			//mFirstTouchTarget == null这种情况可能是1、事件被拦截或事件被取消
+			//mFirstTouchTarget == null这种情况可能是
+            //1、事件被拦截或事件被取消
 			//2、是根本没有子元素
 			//3、也可能是子视图处理了事件，但在dispatchTouchEvent中返回了false
             if (mFirstTouchTarget == null) {
