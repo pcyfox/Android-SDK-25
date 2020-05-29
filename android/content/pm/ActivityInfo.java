@@ -32,7 +32,8 @@ import java.lang.annotation.RetentionPolicy;
  * from the AndroidManifest.xml's &lt;activity&gt; and
  * &lt;receiver&gt; tags.
  */
-public class ActivityInfo extends ComponentInfo
+public class 
+ extends ComponentInfo
         implements Parcelable {
 
      // NOTE: When adding new data members be sure to update the copy-constructor, Parcel

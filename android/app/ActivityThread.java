@@ -700,8 +700,9 @@ public final class ActivityThread {
 			sendMessage(H.SEND_RESULT, res);
 		}
 
-		// startActivity()(启动Activity的进程 是通过AMS的startProcessLocked方法)--AMS(系统进程)-->...ActivitySatckSuperisor.realStartActivityLocked()
-		//--->app.thread.scheduleLaunchActivity()---------->通知新启动的进程启动Activity
+		// startActivity()(启动Activity的进程
+		// 是通过AMS的startProcessLocked方法)--AMS(系统进程)-->...ActivitySatckSuperisor.realStartActivityLocked()
+		// --->app.thread.scheduleLaunchActivity()---------->通知新启动的进程启动Activity
 		// we use token to identify this activity without having to send the
 		// activity itself back to the activity manager. (matters more with ipc)
 		@Override
@@ -1864,6 +1865,7 @@ public final class ActivityThread {
 		return (am != null && am.mBoundApplication != null) ? am.mBoundApplication.processName : null;
 	}
 
+	// 可以通过反射机制利用这个静态方法获取Application
 	public static Application currentApplication() {
 		ActivityThread am = currentActivityThread();
 		return am != null ? am.mInitialApplication : null;
@@ -2582,7 +2584,7 @@ public final class ActivityThread {
 		}
 
 		try {
-			// -------------------------------获取Application实例(如果APP时第一次启动，则先创建Application对象)-------------------------------------
+			// -------------------------------获取Application实例(如果APP时第一次启动，则先创建Application对象,这里拿到的是已经创建好的)-------------------------------------
 			// 在LoadedApk中通过ClassLoader获取Application实例，Application实例是个单例，如果已经存在就直接返回，通常在ActivityThread的attach方法中已经创建
 			// 同时通过instrumentation.callApplicationOnCreate(app);进行初始化
 			Application app = r.packageInfo.makeApplication(false, mInstrumentation);
@@ -2596,7 +2598,7 @@ public final class ActivityThread {
 								+ ", dir=" + r.packageInfo.getAppDir());
 
 			if (activity != null) {
-				// 创建Context实例，即：ContextImpl实例
+				// 创建适合Activity的Context实例，即：对ContextImpl进行
 				Context appContext = createBaseContextForActivity(r, activity);
 				CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
 				Configuration config = new Configuration(mCompatConfiguration);
@@ -2612,7 +2614,7 @@ public final class ActivityThread {
 					r.mPendingRemoveWindowManager = null;
 				}
 
-				// 主要是创建PhoneWindow及初始化与配置WindowManager，将Activity与窗口appContext及进行关联
+				// 主要是创建PhoneWindow及初始化与配置WindowManager，将Activity与window、appContext及进行关联
 				activity.attach(appContext, this, getInstrumentation(), r.token, r.ident, app, r.intent, r.activityInfo,
 						title, r.parent, r.embeddedID, r.lastNonConfigurationInstances, config, r.referrer,
 						r.voiceInteractor, window);
@@ -2738,6 +2740,7 @@ public final class ActivityThread {
 			r.createdConfig = new Configuration(mConfiguration);
 			reportSizeConfigurations(r);
 			Bundle oldState = r.state;
+			// 最重要是将decorView添加到WM中,同时也会创建一个与DecorView紧密联系的ViewRoot的实例ViewRootImpl将负责DecorView与WM间的通讯
 			handleResumeActivity(r.token, false, r.isForward, !r.activity.mFinished && !r.startsNotResumed,
 					r.lastProcessedSeq, reason);
 
@@ -6003,6 +6006,8 @@ public final class ActivityThread {
 		}
 	}
 
+	// 当新启动一个应用时,启动者通过ActivityManagerNative.getDefault()获取Binder对象ActivtyManagerProxy的startActivty()方法向
+	// 系统进程AMS发送启动请求,AMS会通过zygote来fork出新应用的进程,新进程启动后便会执行ActivityThread的main方法
 	// 新进程启动入口
 	public static void main(String[] args) {
 		Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");

@@ -549,7 +549,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
         synchronized (this) {
-            if (mView == null) {
+            if (mVieg iw == null) {
                 mView = view;
 
                 mAttachInfo.mDisplayState = mDisplay.getState();
@@ -628,10 +628,11 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Schedule the first layout -before- adding to the window
                 // manager, to make sure we do the relayout before receiving
-                // any other events from the system.
+                // any other events from the system
+                //************************核心逻辑*******************************************************************************************
 				//1、检查是否在UI线程调用，2、触发视图绘制工作
                 requestLayout();
-				
+                //************************核心逻辑*******************************************************************************************
                 if ((mWindowAttributes.inputFeatures
                         & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
                     mInputChannel = new InputChannel();
@@ -2627,7 +2628,9 @@ public final class ViewRootImpl implements ViewParent,
 
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
-        try {//调用绘制函数
+        try {
+        	//*************************************************绘制核心**************************************
+        	//调用绘制函数
             draw(fullRedrawNeeded);
         } finally {
             mIsDrawing = false;
@@ -2684,6 +2687,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void draw(boolean fullRedrawNeeded) {
+    	//可以看出Activity上说有的UI都是绘制在一个Surface上
         Surface surface = mSurface;
         if (!surface.isValid()) {
             return;
@@ -2820,6 +2824,7 @@ public final class ViewRootImpl implements ViewParent,
                     requestDrawWindow();
                 }
                 //使用硬件渲染器绘制（GPU）
+              
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
@@ -2846,6 +2851,7 @@ public final class ViewRootImpl implements ViewParent,
                     scheduleTraversals();
                     return;
                 }
+                //****************surface会把自己的canvas传递添加的各个View，让他们在在surface上完成绘制*****************
                 //使用CPU绘制（默认使用该方式绘制）
                 if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
                     return;
@@ -2932,7 +2938,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 canvas.setScreenDensity(scalingRequired ? mNoncompatDensity : 0);
                 attachInfo.mSetIgnoreDirtyState = false;
-                //绘制通过setView添加的view
+                //把canvas传递给View
                 mView.draw(canvas);
 
                 drawAccessibilityFocusedDrawableIfNeeded(canvas);

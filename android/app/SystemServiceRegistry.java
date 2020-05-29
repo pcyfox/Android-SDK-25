@@ -16,10 +16,13 @@
 
 package android.app;
 
+import java.util.HashMap;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.IDropBoxManagerService;
+import com.android.internal.policy.PhoneLayoutInflater;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
@@ -36,8 +39,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
-import android.content.pm.ILauncherApps;
-import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
@@ -48,13 +49,15 @@ import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.location.ContextHubManager;
+import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
-import android.hardware.radio.RadioManager;
 import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
@@ -109,8 +112,6 @@ import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
-import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintService;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telecom.TelecomManager;
@@ -120,15 +121,12 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import com.android.internal.policy.PhoneLayoutInflater;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textservice.TextServicesManager;
-
-import java.util.HashMap;
 
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
